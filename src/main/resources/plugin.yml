@@ -1,0 +1,4 @@
+name: Koekatamarin
+version: '${project.version}'
+main: net.kunmc.lab.koekatamarin.Koekatamarin
+api-version: 1.16
