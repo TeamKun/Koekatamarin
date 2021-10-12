@@ -262,7 +262,7 @@ public final class Koekatamarin extends JavaPlugin {
                     @Override
                     public void run() {
                         String msg = ((TextComponent) e.originalMessage()).content();
-                        new MovingString(msg, Config.fontSize, font, Config.speedPerSecond, e.getPlayer().getEyeLocation(), Material.DIAMOND_BLOCK.createBlockData());
+                        new MovingString(msg, Config.fontSize, font, Config.speedPerSecond, e.getPlayer().getEyeLocation(), Material.DIAMOND_BLOCK.createBlockData(), 0);
                     }
                 }.runTask(instance);
             });

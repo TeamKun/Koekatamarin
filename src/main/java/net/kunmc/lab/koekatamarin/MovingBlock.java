@@ -58,6 +58,22 @@ public class MovingBlock {
         this.speedPerSecond = speedPerSecond;
     }
 
+    public void teleport(Location to) {
+        forceTeleportArmorStand(to);
+    }
+
+    public Location getLocation() {
+        return armorStand.getLocation().clone();
+    }
+
+    private void forceTeleportArmorStand(Location to) {
+        CraftArmorStand craftArmorStand = ((CraftArmorStand) armorStand);
+        try {
+            craftArmorStand.getHandle().teleportAndSync(to.getX(), to.getY(), to.getZ());
+        } catch (Exception ignored) {
+        }
+    }
+
     public void remove() {
         movingTask.cancel();
         armorStand.getPassengers().forEach(Entity::remove);
@@ -79,11 +95,7 @@ public class MovingBlock {
             Vector travelDistance = direction.multiply(speedPerSecond / 20);
             Location next = armorStand.getLocation().add(travelDistance);
 
-            CraftArmorStand craftArmorStand = ((CraftArmorStand) armorStand);
-            try {
-                craftArmorStand.getHandle().teleportAndSync(next.getX(), next.getY(), next.getZ());
-            } catch (Exception ignored) {
-            }
+            forceTeleportArmorStand(next);
         }
     }
 }
