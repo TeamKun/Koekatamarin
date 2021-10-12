@@ -77,7 +77,7 @@
         <dependency>
             <groupId>dev.kotx</groupId>
             <artifactId>flylib-reloaded</artifactId>
-            <version>0.3.18</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>org.spigotmc</groupId>

@@ -2,6 +2,7 @@ package net.kunmc.lab.koekatamarin;
 
 import dev.kotx.flylib.FlyLib;
 import io.papermc.paper.event.player.AsyncChatEvent;
+import net.kunmc.lab.koekatamarin.command.MainCommand;
 import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -257,7 +258,13 @@ public final class Koekatamarin extends JavaPlugin {
     @Override
     public void onEnable() {
         FlyLib.create(this, builder -> {
+            builder.command(new MainCommand("koekatamarin"));
+
             builder.listen(AsyncChatEvent.class, e -> {
+                if (!Config.enabled) {
+                    return;
+                }
+               
                 new BukkitRunnable() {
                     @Override
                     public void run() {
