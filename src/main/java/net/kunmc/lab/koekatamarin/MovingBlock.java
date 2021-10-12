@@ -67,6 +67,11 @@ public class MovingBlock {
     private class MovingTask extends BukkitRunnable {
         @Override
         public void run() {
+            if (armorStand.isDead()) {
+                this.cancel();
+                return;
+            }
+            
             fallingBlock.setTicksLived(1);
 
             Vector direction = spawnedLocation.getDirection();

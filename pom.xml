@@ -47,7 +47,11 @@
         <resources>
             <resource>
                 <directory>src/main/resources</directory>
-                <filtering>true</filtering>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.yml</include>
+                    <include>**/*.ttf</include>
+                </includes>
             </resource>
         </resources>
     </build>
