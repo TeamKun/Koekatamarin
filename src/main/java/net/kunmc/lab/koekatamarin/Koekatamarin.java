@@ -21,7 +21,7 @@ public final class Koekatamarin extends JavaPlugin {
     public Koekatamarin() throws IOException, FontFormatException {
         instance = this;
         font = Font.createFont(Font.TRUETYPE_FONT, getResource("ipagp.ttf"));
-        letterMap.putAll(new HashMap<Character, Letter>() {{
+        letterMap.putAll(new HashMap<>() {{
             put('a', new Letter('a', Config.fontSize, font));
             put('b', new Letter('b', Config.fontSize, font));
             put('c', new Letter('c', Config.fontSize, font));
@@ -264,10 +264,12 @@ public final class Koekatamarin extends JavaPlugin {
                     public void run() {
                         String msg = ((TextComponent) e.originalMessage()).content();
                         for (char c : msg.toCharArray()) {
-                            letterMap.get(c).blockPosList.forEach(v -> {
-                                Location loc = e.getPlayer().getLocation().clone().add(v);
-                                new MovingBlock(loc, 1.0, Material.DIAMOND_BLOCK.createBlockData());
-                            });
+                            Location loc = e.getPlayer().getEyeLocation();
+                            new MovingLetter(
+                                    letterMap.get(c).rotate(Math.toRadians(loc.getPitch()), Math.toRadians(loc.getYaw())),
+                                    Config.speedPerSecond,
+                                    loc,
+                                    Material.DIAMOND_BLOCK.createBlockData());
                         }
                     }
                 }.runTask(instance);

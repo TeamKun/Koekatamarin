@@ -1,5 +1,6 @@
 package net.kunmc.lab.koekatamarin;
 
+import org.bukkit.Location;
 import org.bukkit.util.Vector;
 
 import javax.annotation.Nullable;
@@ -8,10 +9,13 @@ import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class Letter {
     private final Font font;
-    public final List<Vector> blockPosList;
+    private final List<Vector> relativePosList;
+    public final int width;
+    public final int height;
     private final int black = -16777216;
 
     public Letter(char letter, float fontSize, @Nullable Font font) {
@@ -22,17 +26,44 @@ public class Letter {
         }
 
         BufferedImage img = createLetterImage(letter);
-        List<Vector> positionList = new ArrayList<>();
+        width = img.getWidth();
+        height = img.getHeight();
 
-        for (int y = 0; y < img.getHeight(); y++) {
-            for (int x = 0; x < img.getWidth(); x++) {
+        List<Vector> positionList = new ArrayList<>();
+        for (int y = 0; y < height; y++) {
+            for (int x = 0; x < width; x++) {
                 if (img.getRGB(x, y) == black) {
-                    positionList.add(new Vector(x, img.getHeight() - y, 0));
+                    positionList.add(new Vector(-x, height - y, 0));
                 }
             }
         }
 
-        blockPosList = Collections.unmodifiableList(positionList);
+        relativePosList = Collections.unmodifiableList(positionList);
+    }
+
+    private Letter(Font font, List<Vector> posList, int width, int height) {
+        this.font = font;
+        this.relativePosList = posList;
+        this.width = width;
+        this.height = height;
+    }
+
+    public Letter rotate(double xAngle, double yAngle) {
+        return new Letter(
+                font,
+                relativePosList.stream()
+                        .map(Vector::clone)
+                        .map(v -> v.rotateAroundX(xAngle))
+                        .map(v -> v.rotateAroundY(-yAngle))
+                        .collect(Collectors.toUnmodifiableList()),
+                width,
+                height);
+    }
+
+    public List<Location> toLocationList(Location bottomLeft) {
+        return relativePosList.stream()
+                .map(v -> bottomLeft.clone().add(v))
+                .collect(Collectors.toUnmodifiableList());
     }
 
     private BufferedImage createLetterImage(char letter) {
