@@ -16,6 +16,8 @@ public class Letter {
     private final List<Vector> relativePosList;
     public final int width;
     public final int height;
+    private double xAngle = 0.0;
+    private double yAngle = 0.0;
     private final int black = -16777216;
 
     public Letter(char letter, float fontSize, @Nullable Font font) {
@@ -41,11 +43,13 @@ public class Letter {
         relativePosList = Collections.unmodifiableList(positionList);
     }
 
-    private Letter(Font font, List<Vector> posList, int width, int height) {
+    private Letter(Font font, List<Vector> posList, int width, int height, double xAngle, double yAngle) {
         this.font = font;
         this.relativePosList = posList;
         this.width = width;
         this.height = height;
+        this.xAngle = xAngle;
+        this.yAngle = yAngle;
     }
 
     public Letter rotate(double xAngle, double yAngle) {
@@ -57,7 +61,17 @@ public class Letter {
                         .map(v -> v.rotateAroundY(-yAngle))
                         .collect(Collectors.toUnmodifiableList()),
                 width,
-                height);
+                height,
+                xAngle,
+                yAngle);
+    }
+
+    public double xAngle() {
+        return xAngle;
+    }
+
+    public double yAngle() {
+        return yAngle;
     }
 
     public List<Location> toLocationList(Location bottomLeft) {

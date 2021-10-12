@@ -3,7 +3,6 @@ package net.kunmc.lab.koekatamarin;
 import dev.kotx.flylib.FlyLib;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kyori.adventure.text.TextComponent;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
@@ -20,7 +19,7 @@ public final class Koekatamarin extends JavaPlugin {
 
     public Koekatamarin() throws IOException, FontFormatException {
         instance = this;
-        font = Font.createFont(Font.TRUETYPE_FONT, getResource("ipagp.ttf"));
+        font = Font.createFont(Font.TRUETYPE_FONT, getResource("font.ttf"));
         letterMap.putAll(new HashMap<>() {{
             put('a', new Letter('a', Config.fontSize, font));
             put('b', new Letter('b', Config.fontSize, font));
@@ -263,14 +262,7 @@ public final class Koekatamarin extends JavaPlugin {
                     @Override
                     public void run() {
                         String msg = ((TextComponent) e.originalMessage()).content();
-                        for (char c : msg.toCharArray()) {
-                            Location loc = e.getPlayer().getEyeLocation();
-                            new MovingLetter(
-                                    letterMap.get(c).rotate(Math.toRadians(loc.getPitch()), Math.toRadians(loc.getYaw())),
-                                    Config.speedPerSecond,
-                                    loc,
-                                    Material.DIAMOND_BLOCK.createBlockData());
-                        }
+                        new MovingString(msg, Config.fontSize, font, Config.speedPerSecond, e.getPlayer().getEyeLocation(), Material.DIAMOND_BLOCK.createBlockData());
                     }
                 }.runTask(instance);
             });

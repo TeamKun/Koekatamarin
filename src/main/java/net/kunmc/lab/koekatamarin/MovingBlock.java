@@ -68,10 +68,11 @@ public class MovingBlock {
         @Override
         public void run() {
             if (armorStand.isDead()) {
-                this.cancel();
+                remove();
+                cancel();
                 return;
             }
-            
+
             fallingBlock.setTicksLived(1);
 
             Vector direction = spawnedLocation.getDirection();
