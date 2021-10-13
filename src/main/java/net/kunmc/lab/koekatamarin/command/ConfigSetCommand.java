@@ -12,7 +12,6 @@ public class ConfigSetCommand extends Command {
         try {
             for (Field field : Config.class.getDeclaredFields()) {
                 if (!field.getName().equals("enabled")) {
-                    System.out.println(field.getName());
                     children(new ConfigItem(field));
                 }
             }

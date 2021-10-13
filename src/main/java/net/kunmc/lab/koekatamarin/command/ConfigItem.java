@@ -34,7 +34,6 @@ public class ConfigItem extends Command {
                 }
 
                 Object value = type.argumentToObject(argument);
-
                 try {
                     configField.set(null, value);
                 } catch (IllegalAccessException e) {
@@ -44,7 +43,6 @@ public class ConfigItem extends Command {
                 ctx.success(name + "の値を" + value + "に設定しました");
             });
         });
-
     }
 
     private enum ArgumentType {

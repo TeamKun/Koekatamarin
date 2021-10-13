@@ -57,7 +57,7 @@ public class MovingBlock {
     }
 
     public void setMoving(boolean b) {
-        this.moving = b;
+        moving = b;
     }
 
     public double speedPerSecond() {
@@ -111,7 +111,6 @@ public class MovingBlock {
             }
 
             fallingBlock.setTicksLived(1);
-
             if (!moving) {
                 return;
             }
