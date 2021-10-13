@@ -68,8 +68,8 @@ public class Letter {
                         .collect(Collectors.toUnmodifiableList()),
                 width,
                 height,
-                xAngle,
-                yAngle);
+                this.xAngle + xAngle,
+                this.yAngle + yAngle);
     }
 
     public double xAngle() {
