@@ -3,8 +3,6 @@ package net.kunmc.lab.koekatamarin;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
-import org.bukkit.scheduler.BukkitRunnable;
-import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.util.Vector;
 
 import java.util.List;
@@ -12,15 +10,12 @@ import java.util.stream.Collectors;
 
 public class MovingLetter {
     private final List<MovingBlock> blockList;
-    private final BukkitTask detectCollisionTask;
 
     public MovingLetter(Letter letter, double speedPerSecond, Location bottomLeft, BlockData blockData) {
         List<Location> locationList = letter.toLocationList(bottomLeft);
         blockList = locationList.stream()
                 .map(x -> new MovingBlock(x, speedPerSecond, blockData))
                 .collect(Collectors.toUnmodifiableList());
-
-        detectCollisionTask = new DetectCollisionTask().runTaskTimerAsynchronously(Koekatamarin.instance, 0, 0);
     }
 
     public void rotateAroundYAxis(Vector axis, double degrees) {
@@ -39,7 +34,6 @@ public class MovingLetter {
     }
 
     public void remove() {
-        detectCollisionTask.cancel();
         blockList.forEach(MovingBlock::remove);
     }
 
@@ -63,35 +57,12 @@ public class MovingLetter {
         throw new UnsupportedOperationException();
     }
 
+    public void setMoving(boolean b) {
+        blockList.forEach(x -> x.setMoving(b));
+    }
+
     public boolean isRemoved() {
         return blockList.stream()
                 .allMatch(MovingBlock::isRemoved);
-    }
-
-    private class DetectCollisionTask extends BukkitRunnable {
-        @Override
-        public void run() {
-            if (isRemoved()) {
-                cancel();
-                return;
-            }
-
-            boolean moving = !(isCollideWithBlock() || isCollideWithLiquid());
-            blockList.forEach(x -> {
-                x.setMoving(moving);
-            });
-        }
-
-        private synchronized void threadWait() {
-            try {
-                wait();
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-        private synchronized void threadNotify() {
-            notify();
-        }
     }
 }

@@ -2,6 +2,8 @@ package net.kunmc.lab.koekatamarin;
 
 import org.bukkit.Location;
 import org.bukkit.block.data.BlockData;
+import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.awt.*;
 import java.util.ArrayList;
@@ -11,6 +13,7 @@ import java.util.stream.Collectors;
 
 public class MovingString {
     private final List<MovingLetter> movingLetterList;
+    private final BukkitTask detectCollisionTask;
 
     public MovingString(String str, float fontSize, Font font, double speedPerSecond, Location centerBottom, BlockData blockData, double degrees) {
         this(Letter.toLetterList(str, fontSize, font),
@@ -44,15 +47,17 @@ public class MovingString {
             }
 
             tmpMovingLetterList.add(new MovingLetter(letter, speedPerSecond, letterLocation, blockData));
-           
+
             double width = letter.width + 1;
             loc.add(-width * Math.cos(yAngle), 0, -width * Math.sin(yAngle));
         }
 
         movingLetterList = Collections.unmodifiableList(tmpMovingLetterList);
+        detectCollisionTask = new DetectCollisionTask().runTaskTimerAsynchronously(Koekatamarin.instance, 0, 0);
     }
 
     public void remove() {
+        detectCollisionTask.cancel();
         movingLetterList.forEach(MovingLetter::remove);
     }
 
@@ -62,5 +67,54 @@ public class MovingString {
                 .sum();
         width += letterList.size() - 1;
         return width;
+    }
+
+    public boolean isRemoved() {
+        return movingLetterList.stream()
+                .allMatch(MovingLetter::isRemoved);
+    }
+
+    public boolean isCollideWithBlock() {
+        return movingLetterList.stream()
+                .anyMatch(MovingLetter::isCollideWithBlock);
+    }
+
+    public boolean isCollideWithLiquid() {
+        return movingLetterList.stream()
+                .anyMatch(MovingLetter::isCollideWithLiquid);
+    }
+
+    public boolean isCollideWithOtherStrings() {
+        return movingLetterList.stream()
+                .anyMatch(MovingLetter::isCollideWithOtherLetters);
+    }
+
+    public void setMoving(boolean b) {
+        movingLetterList.forEach(x -> x.setMoving(b));
+    }
+
+    private class DetectCollisionTask extends BukkitRunnable {
+        @Override
+        public void run() {
+            if (isRemoved()) {
+                cancel();
+                return;
+            }
+
+            boolean moving = !(isCollideWithBlock() || isCollideWithLiquid());
+            setMoving(moving);
+        }
+
+        private synchronized void threadWait() {
+            try {
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        private synchronized void threadNotify() {
+            notify();
+        }
     }
 }
