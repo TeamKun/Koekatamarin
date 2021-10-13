@@ -4,7 +4,6 @@ import dev.kotx.flylib.FlyLib;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kunmc.lab.koekatamarin.command.MainCommand;
 import net.kyori.adventure.text.TextComponent;
-import org.bukkit.Material;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -264,12 +263,12 @@ public final class Koekatamarin extends JavaPlugin {
                 if (!Config.enabled) {
                     return;
                 }
-               
+
                 new BukkitRunnable() {
                     @Override
                     public void run() {
                         String msg = ((TextComponent) e.originalMessage()).content();
-                        new MovingString(msg, Config.fontSize, font, Config.speedPerSecond, e.getPlayer().getEyeLocation(), Material.DIAMOND_BLOCK.createBlockData(), 0);
+                        new MovingString(msg, Config.fontSize, font, Config.speedPerSecond, e.getPlayer().getEyeLocation(), Config.block, Config.degrees);
                     }
                 }.runTask(instance);
             });
