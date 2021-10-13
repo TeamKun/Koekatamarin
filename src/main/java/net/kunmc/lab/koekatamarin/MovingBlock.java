@@ -21,6 +21,7 @@ public class MovingBlock {
     private final FallingBlock fallingBlock;
     private final BukkitTask movingTask;
     private double speedPerSecond;
+    private boolean moving = true;
     public static final String scoreboardTag = "movingBlockEntity";
 
     public MovingBlock(Location location, double speedPerSecond, BlockData blockData) {
@@ -55,6 +56,10 @@ public class MovingBlock {
         movingTask = new MovingTask().runTaskTimerAsynchronously(Koekatamarin.instance, 0, 0);
     }
 
+    public void setMoving(boolean b) {
+        this.moving = b;
+    }
+
     public double speedPerSecond() {
         return speedPerSecond;
     }
@@ -71,6 +76,13 @@ public class MovingBlock {
         return armorStand.getLocation().clone();
     }
 
+    public Location getCenterLocation() {
+        Location loc = shulker.getBoundingBox().getCenter().toLocation(spawnedLocation.getWorld());
+        loc.setPitch(spawnedLocation.getPitch());
+        loc.setYaw(spawnedLocation.getYaw());
+        return loc;
+    }
+
     private void forceTeleportArmorStand(Location to) {
         CraftArmorStand craftArmorStand = ((CraftArmorStand) armorStand);
         try {
@@ -85,6 +97,10 @@ public class MovingBlock {
         armorStand.remove();
     }
 
+    public boolean isRemoved() {
+        return armorStand.isDead();
+    }
+
     private class MovingTask extends BukkitRunnable {
         @Override
         public void run() {
@@ -95,6 +111,10 @@ public class MovingBlock {
             }
 
             fallingBlock.setTicksLived(1);
+
+            if (!moving) {
+                return;
+            }
 
             Vector direction = spawnedLocation.getDirection();
             Vector travelDistance = direction.multiply(speedPerSecond / 20);
