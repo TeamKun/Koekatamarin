@@ -52,6 +52,12 @@ public class Letter {
         this.yAngle = yAngle;
     }
 
+    public static List<Letter> toLetterList(String str, float fontSize, Font font) {
+        return str.chars()
+                .mapToObj(x -> new Letter(((char) x), fontSize, font))
+                .collect(Collectors.toUnmodifiableList());
+    }
+
     public Letter rotate(double xAngle, double yAngle) {
         return new Letter(
                 font,

@@ -13,7 +13,7 @@ public class MovingString {
     private final List<MovingLetter> movingLetterList;
 
     public MovingString(String str, float fontSize, Font font, double speedPerSecond, Location centerBottom, BlockData blockData, double degrees) {
-        this(str.chars().mapToObj(x -> new Letter(((char) x), fontSize, font)).collect(Collectors.toUnmodifiableList()),
+        this(Letter.toLetterList(str, fontSize, font),
                 speedPerSecond,
                 centerBottom,
                 blockData,

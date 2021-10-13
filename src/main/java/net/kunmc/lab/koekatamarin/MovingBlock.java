@@ -17,6 +17,7 @@ import static org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason.CUSTOM;
 public class MovingBlock {
     private final Location spawnedLocation;
     private final ArmorStand armorStand;
+    private final Shulker shulker;
     private final FallingBlock fallingBlock;
     private final BukkitTask movingTask;
     private double speedPerSecond;
@@ -32,7 +33,7 @@ public class MovingBlock {
             x.setGravity(false);
         });
 
-        world.spawn(spawnedLocation, Shulker.class, CUSTOM, x -> {
+        shulker = world.spawn(spawnedLocation, Shulker.class, CUSTOM, x -> {
             x.setAI(false);
             x.setSilent(true);
             x.setInvulnerable(true);
