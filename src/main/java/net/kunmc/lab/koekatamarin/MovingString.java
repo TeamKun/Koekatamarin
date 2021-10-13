@@ -23,6 +23,9 @@ public class MovingString {
     public MovingString(List<Letter> letterList, double speedPerSecond, Location centerBottom, BlockData blockData, double degrees) {
         List<MovingLetter> tmpMovingLetterList = new ArrayList<>();
 
+        double maxHeight = letterList.stream()
+                .mapToInt(x -> x.height)
+                .max().getAsInt();
         double xAngle = Math.toRadians(centerBottom.getPitch() * (90 - degrees) / 90);
         double yAngle = Math.toRadians(centerBottom.getYaw() + degrees);
 
@@ -35,7 +38,13 @@ public class MovingString {
         loc.add(strWidth / 2 * Math.cos(yAngle), 0, strWidth / 2 * Math.sin(yAngle));
 
         for (Letter letter : rotatedLetterList) {
-            tmpMovingLetterList.add(new MovingLetter(letter, speedPerSecond, loc, blockData));
+            Location letterLocation = loc.clone();
+            if (letter.height == 1) {
+                letterLocation.add(0.0, (maxHeight - 1) / 2, 0.0);
+            }
+
+            tmpMovingLetterList.add(new MovingLetter(letter, speedPerSecond, letterLocation, blockData));
+           
             double width = letter.width + 1;
             loc.add(-width * Math.cos(yAngle), 0, -width * Math.sin(yAngle));
         }

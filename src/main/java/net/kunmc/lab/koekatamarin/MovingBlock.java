@@ -21,6 +21,7 @@ public class MovingBlock {
     private final FallingBlock fallingBlock;
     private final BukkitTask movingTask;
     private double speedPerSecond;
+    public static final String scoreboardTag = "movingBlockEntity";
 
     public MovingBlock(Location location, double speedPerSecond, BlockData blockData) {
         this.spawnedLocation = location.clone();
@@ -31,6 +32,7 @@ public class MovingBlock {
             x.setMarker(true);
             x.setVisible(false);
             x.setGravity(false);
+            x.addScoreboardTag(scoreboardTag);
         });
 
         shulker = world.spawn(spawnedLocation, Shulker.class, CUSTOM, x -> {
@@ -39,6 +41,7 @@ public class MovingBlock {
             x.setInvulnerable(true);
             x.setInvisible(true);
             x.setLootTable(null);
+            x.addScoreboardTag(scoreboardTag);
             armorStand.addPassenger(x);
         });
 
@@ -46,6 +49,7 @@ public class MovingBlock {
         fallingBlock.setInvulnerable(true);
         fallingBlock.setDropItem(false);
         fallingBlock.setGravity(false);
+        fallingBlock.addScoreboardTag(scoreboardTag);
         armorStand.addPassenger(fallingBlock);
 
         movingTask = new MovingTask().runTaskTimerAsynchronously(Koekatamarin.instance, 0, 0);
