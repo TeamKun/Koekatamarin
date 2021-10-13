@@ -117,12 +117,13 @@ public class MovingBlock {
             }
 
             fallingBlock.setTicksLived(1);
-            if (!moving) {
-                return;
-            }
 
             Vector direction = spawnedLocation.getDirection();
             Vector travelDistance = direction.multiply(speedPerSecond / 20);
+            if (!moving) {
+                travelDistance = direction.multiply(0.003);
+            }
+
             Location next = armorStand.getLocation().add(travelDistance);
 
             forceTeleportArmorStand(next);
