@@ -22,6 +22,7 @@ public class MovingBlock {
     private final BukkitTask movingTask;
     private double speedPerSecond;
     private boolean moving = true;
+    private int ticksLived = 0;
     public static final String scoreboardTag = "movingBlockEntity";
 
     public MovingBlock(Location location, double speedPerSecond, BlockData blockData) {
@@ -104,6 +105,11 @@ public class MovingBlock {
     private class MovingTask extends BukkitRunnable {
         @Override
         public void run() {
+            ticksLived++;
+            if (ticksLived > 60 * 20) {
+                remove();
+            }
+
             if (armorStand.isDead()) {
                 remove();
                 cancel();
