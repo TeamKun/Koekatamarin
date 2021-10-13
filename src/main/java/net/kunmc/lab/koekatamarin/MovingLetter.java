@@ -1,6 +1,7 @@
 package net.kunmc.lab.koekatamarin;
 
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.bukkit.scheduler.BukkitTask;
@@ -50,6 +51,14 @@ public class MovingLetter {
                 .anyMatch(x -> x.getType().isSolid());
     }
 
+    public boolean isCollideWithLiquid() {
+        return blockList.stream()
+                .map(MovingBlock::getCenterLocation)
+                .map(x -> x.add(x.getDirection().multiply(0.625)))
+                .map(Location::getBlock)
+                .anyMatch(Block::isLiquid);
+    }
+
     public boolean isCollideWithOtherLetters() {
         throw new UnsupportedOperationException();
     }
@@ -67,7 +76,7 @@ public class MovingLetter {
                 return;
             }
 
-            boolean moving = !isCollideWithBlock();
+            boolean moving = !(isCollideWithBlock() || isCollideWithLiquid());
             blockList.forEach(x -> {
                 x.setMoving(moving);
             });
