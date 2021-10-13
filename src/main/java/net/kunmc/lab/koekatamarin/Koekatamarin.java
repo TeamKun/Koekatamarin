@@ -17,11 +17,13 @@ public final class Koekatamarin extends JavaPlugin {
     public static Koekatamarin instance;
     private final Set<Character> charSet = new HashSet<>();
     private final Map<Character, Letter> cachedLetterMap = new HashMap<>();
-    private final Font font;
+    private final Font kanaFont;
+    private final Font ipapgothicFont;
 
     public Koekatamarin() throws IOException, FontFormatException {
         instance = this;
-        font = Font.createFont(Font.TRUETYPE_FONT, getResource("font.ttf"));
+        kanaFont = Font.createFont(Font.TRUETYPE_FONT, getResource("4x4kanafont.ttf"));
+        ipapgothicFont = Font.createFont(Font.TRUETYPE_FONT, getResource("ipapgothic.ttf"));
         charSet.addAll(new HashSet<>() {{
             add('a');
             add('b');
@@ -269,9 +271,11 @@ public final class Koekatamarin extends JavaPlugin {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
+                        Font font = Config.use4x4KanaFont ? kanaFont : ipapgothicFont;
+
                         cachedLetterMap.keySet().forEach(x -> {
                             cachedLetterMap.computeIfPresent(x, (k, v) -> {
-                                if (v.fontSize != Config.fontSize) {
+                                if (v.fontSize != Config.fontSize || !font.getName().equals(v.font.getName())) {
                                     return new Letter(k, Config.fontSize, font);
                                 }
                                 return v;
