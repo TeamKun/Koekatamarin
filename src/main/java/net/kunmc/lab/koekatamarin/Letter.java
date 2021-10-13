@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Letter {
+    public final float fontSize;
     private final Font font;
     private final List<Vector> relativePosList;
     public final int width;
@@ -21,6 +22,7 @@ public class Letter {
     private final int black = -16777216;
 
     public Letter(char letter, float fontSize, @Nullable Font font) {
+        this.fontSize = fontSize;
         if (font == null) {
             this.font = new Font("Dialog.plain", Font.PLAIN, ((int) fontSize));
         } else {
@@ -43,7 +45,8 @@ public class Letter {
         relativePosList = Collections.unmodifiableList(positionList);
     }
 
-    private Letter(Font font, List<Vector> posList, int width, int height, double xAngle, double yAngle) {
+    private Letter(float fontSize, Font font, List<Vector> posList, int width, int height, double xAngle, double yAngle) {
+        this.fontSize = fontSize;
         this.font = font;
         this.relativePosList = posList;
         this.width = width;
@@ -60,6 +63,7 @@ public class Letter {
 
     public Letter rotate(double xAngle, double yAngle) {
         return new Letter(
+                fontSize,
                 font,
                 relativePosList.stream()
                         .map(Vector::clone)

@@ -269,6 +269,15 @@ public final class Koekatamarin extends JavaPlugin {
                 new BukkitRunnable() {
                     @Override
                     public void run() {
+                        cachedLetterMap.keySet().forEach(x -> {
+                            cachedLetterMap.computeIfPresent(x, (k, v) -> {
+                                if (v.fontSize != Config.fontSize) {
+                                    return new Letter(k, Config.fontSize, font);
+                                }
+                                return v;
+                            });
+                        });
+
                         String msg = ((TextComponent) e.originalMessage()).content();
                         if (Config.limitCharTypes) {
                             msg = msg.chars()
