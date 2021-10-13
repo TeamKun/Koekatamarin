@@ -11,5 +11,6 @@ public class Config {
     public static double degrees = 0.0;
     public static int maxLengthOfStr = 5;
     public static boolean limitCharTypes = true;
+    public static boolean enableUsingTeamColorBlock = true;
     public static BlockData block = Material.DIAMOND_BLOCK.createBlockData();
 }
