@@ -4,6 +4,8 @@ import dev.kotx.flylib.FlyLib;
 import io.papermc.paper.event.player.AsyncChatEvent;
 import net.kunmc.lab.koekatamarin.command.MainCommand;
 import net.kyori.adventure.text.TextComponent;
+import org.bukkit.Bukkit;
+import org.bukkit.entity.Entity;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitRunnable;
 
@@ -307,5 +309,10 @@ public final class Koekatamarin extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        Bukkit.getWorlds().forEach(w -> {
+            w.getEntities().stream()
+                    .filter(x -> x.getScoreboardTags().contains(MovingBlock.scoreboardTag))
+                    .forEach(Entity::remove);
+        });
     }
 }
