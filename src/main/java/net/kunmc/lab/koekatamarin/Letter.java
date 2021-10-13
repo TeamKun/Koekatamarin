@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class Letter {
     public final float fontSize;
-    private final Font font;
+    public final Font font;
     private final List<Vector> relativePosList;
     public final int width;
     public final int height;
@@ -91,7 +91,7 @@ public class Letter {
     }
 
     private BufferedImage createLetterImage(char letter) {
-        int imgSize = 20 * 10 / font.getSize();
+        int imgSize = 40 * font.getSize() / 10;
         BufferedImage img = new BufferedImage(imgSize, imgSize, BufferedImage.TYPE_3BYTE_BGR);
         Graphics graphics = img.createGraphics();
 
