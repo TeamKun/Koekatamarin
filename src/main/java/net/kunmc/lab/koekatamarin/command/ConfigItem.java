@@ -2,25 +2,28 @@ package net.kunmc.lab.koekatamarin.command;
 
 import dev.kotx.flylib.command.Command;
 import dev.kotx.flylib.command.UsageBuilder;
+import net.kunmc.lab.koekatamarin.Config;
 import org.bukkit.Material;
 import org.bukkit.block.data.BlockData;
 
 import java.lang.reflect.Field;
-import java.util.ArrayList;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.ParameterizedType;
 import java.util.Arrays;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ConfigItem extends Command {
-    public ConfigItem(Field configField) {
+    public ConfigItem(Field configField) throws IllegalAccessException {
         super(configField.getName());
         configField.setAccessible(true);
 
-        String name = configField.getName();
-        Class clazz = configField.getType();
-        ArgumentType type = ArgumentType.valueOf(clazz);
+        String configName = configField.getName();
+        Config.Value configValue = (Config.Value) configField.get(null);
+        ArgumentType type = ArgumentType.byClass(getGenericsClass(configField));
 
         usage(builder -> {
             type.appendArgument(builder);
@@ -33,41 +36,49 @@ public class ConfigItem extends Command {
                     return;
                 }
 
-                Object value = type.argumentToObject(argument);
-                try {
-                    configField.set(null, value);
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                }
+                Object value = type.argumentToValue(argument);
+                configValue.value(value);
 
-                ctx.success(name + "の値を" + value + "に設定しました");
+                ctx.success(configName + "の値を" + value + "に設定しました");
             });
         });
     }
 
-    private enum ArgumentType {
-        INT(int.class,
-                b -> b.integerArgument("IntegerValue"),
+    private static Class getGenericsClass(Field field) {
+        Class genericsClass = null;
+        try {
+            String genericsTypeName = ((ParameterizedType) field.getGenericType()).getActualTypeArguments()[0].getTypeName();
+            genericsClass = Class.forName(genericsTypeName);
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
+        }
+
+        return genericsClass;
+    }
+
+    private static class ArgumentType<T> {
+        static final ArgumentType<Integer> Integer = new ArgumentType<>(
+                builder -> builder.integerArgument("IntegerArgument"),
                 x -> true,
-                x -> ((int) x),
-                Integer.class),
-        DOUBLE(double.class,
-                b -> b.doubleArgument("DoubleValue"),
+                x -> ((Integer) x)
+        );
+        static final ArgumentType<Double> Double = new ArgumentType<>(
+                builder -> builder.doubleArgument("DoubleArgument"),
                 x -> true,
-                x -> ((double) x),
-                Double.class),
-        FLOAT(float.class,
-                b -> b.floatArgument("FloatValue"),
+                x -> ((Double) x)
+        );
+        static final ArgumentType<Float> Float = new ArgumentType<>(
+                builder -> builder.floatArgument("FloatArgumnet"),
                 x -> true,
-                x -> ((float) x),
-                Float.class),
-        BOOLEAN(boolean.class,
-                b -> b.booleanArgument("BooleanValue",
-                        sb -> sb.suggest("true").suggest("false")),
+                x -> ((Float) x)
+        );
+        static final ArgumentType<Boolean> Boolean = new ArgumentType<>(
+                builder -> builder.booleanArgument("BooleanArgument",
+                        sb -> sb.suggest("true").suggest("true")),
                 x -> true,
-                x -> ((boolean) x),
-                Boolean.class),
-        BLOCKDATA(BlockData.class,
+                x -> ((Boolean) x)
+        );
+        static final ArgumentType<BlockData> BlockData = new ArgumentType<>(
                 b -> b.textArgument("BlockName", sb -> {
                     Arrays.stream(Material.values())
                             .filter(Material::isBlock)
@@ -75,38 +86,25 @@ public class ConfigItem extends Command {
                             .map(String::toLowerCase)
                             .forEach(sb::suggest);
                 }),
-                x -> {
-                    return Arrays.stream(Material.values())
-                            .filter(Material::isBlock)
-                            .anyMatch(m -> m.name().equals(x.toString().toUpperCase()));
-                },
-                x -> {
-                    return Arrays.stream(Material.values())
-                            .filter(m -> m.name().equals(x.toString().toUpperCase()))
-                            .map(Material::createBlockData)
-                            .findFirst()
-                            .get();
-                });
+                x -> Arrays.stream(Material.values())
+                        .filter(Material::isBlock)
+                        .anyMatch(m -> m.name().equals(x.toString().toUpperCase())),
+                x -> Arrays.stream(Material.values())
+                        .filter(m -> m.name().equals(x.toString().toUpperCase()))
+                        .map(Material::createBlockData)
+                        .findFirst()
+                        .get()
+        );
 
-        private final List<Class> classList;
+
         private final Consumer<UsageBuilder> appendArgument;
         private final Predicate<Object> isCollectArgument;
-        private final Function<Object, ?> argumentToObject;
+        private final Function<Object, T> argumentToValue;
 
-        <T> ArgumentType(Class<T> clazz, Consumer<UsageBuilder> appendArgument, Predicate<Object> isCollectArgument, Function<Object, T> argumentToObject, Class... additionalClasses) {
-            this.classList = new ArrayList<>() {{
-                add(clazz);
-                addAll(Arrays.asList(additionalClasses));
-            }};
+        private ArgumentType(Consumer<UsageBuilder> appendArgument, Predicate<Object> isCollectArgument, Function<Object, T> argumentToValue) {
             this.appendArgument = appendArgument;
             this.isCollectArgument = isCollectArgument;
-            this.argumentToObject = argumentToObject;
-        }
-
-        public static ArgumentType valueOf(Class clazz) {
-            return Arrays.stream(values())
-                    .filter(x -> x.classList.contains(clazz))
-                    .findFirst().orElse(null);
+            this.argumentToValue = argumentToValue;
         }
 
         public void appendArgument(UsageBuilder builder) {
@@ -117,8 +115,25 @@ public class ConfigItem extends Command {
             return isCollectArgument.test(argument);
         }
 
-        public Object argumentToObject(Object argument) {
-            return argumentToObject.apply(argument);
+        public T argumentToValue(Object argument) {
+            return argumentToValue.apply(argument);
+        }
+
+        private static final Map<Class, ArgumentType> classArgumentTypeMap = new HashMap<>() {{
+            Arrays.stream(ArgumentType.class.getDeclaredFields())
+                    .peek(x -> x.setAccessible(true))
+                    .filter(x -> Modifier.isStatic(x.getModifiers()))
+                    .forEach(x -> {
+                        try {
+                            put(getGenericsClass(x), ((ArgumentType) x.get(null)));
+                        } catch (IllegalAccessException e) {
+                            e.printStackTrace();
+                        }
+                    });
+        }};
+
+        public static ArgumentType byClass(Class clazz) {
+            return classArgumentTypeMap.get(clazz);
         }
     }
 }

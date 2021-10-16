@@ -14,14 +14,14 @@ public class ConfigShowCommand extends Command {
     @Override
     public void execute(CommandContext ctx) {
         for (Field field : Config.class.getDeclaredFields()) {
-            Object target = null;
+            Object value = null;
             try {
-                target = field.get(null);
+                value = ((Config.Value) field.get(null)).value();
             } catch (Exception e) {
                 e.printStackTrace();
             }
 
-            ctx.success(field.getName() + ": " + target);
+            ctx.success(field.getName() + ": " + value);
         }
     }
 }

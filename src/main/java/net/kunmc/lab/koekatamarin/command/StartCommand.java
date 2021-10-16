@@ -11,12 +11,12 @@ public class StartCommand extends Command {
 
     @Override
     public void execute(CommandContext ctx) {
-        if (Config.enabled) {
+        if (Config.enabled.value()) {
             ctx.fail("有効化済みです.");
             return;
         }
 
-        Config.enabled = true;
+        Config.enabled.value(true);
         ctx.success("有効化しました.");
     }
 }

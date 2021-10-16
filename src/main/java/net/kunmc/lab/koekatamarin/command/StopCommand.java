@@ -11,12 +11,12 @@ public class StopCommand extends Command {
 
     @Override
     public void execute(CommandContext ctx) {
-        if (!Config.enabled) {
+        if (!Config.enabled.value()) {
             ctx.fail("すでに無効化されています.");
             return;
         }
 
-        Config.enabled = false;
+        Config.enabled.value(false);
         ctx.success("無効化しました.");
     }
 }

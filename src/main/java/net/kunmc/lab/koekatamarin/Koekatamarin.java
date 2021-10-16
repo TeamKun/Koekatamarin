@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 public final class Koekatamarin extends JavaPlugin {
     public static Koekatamarin instance;
     private final Set<Character> charSet = new HashSet<>();
-    private final Map<Character, Letter> cachedLetterMap = new HashMap<>();
+    public static final Map<Character, Letter> cachedLetterMap = new HashMap<>();
     private final Font kanaFont;
     private final Font ipapgothicFont;
 
@@ -272,41 +272,32 @@ public final class Koekatamarin extends JavaPlugin {
             builder.command(new MainCommand("koekatamarin"));
 
             builder.listen(AsyncChatEvent.class, e -> {
-                if (!Config.enabled) {
+                if (!Config.enabled.value()) {
                     return;
                 }
 
                 new BukkitRunnable() {
                     @Override
                     public void run() {
-                        Font font = Config.use4x4KanaFont ? kanaFont : ipapgothicFont;
-
-                        cachedLetterMap.keySet().forEach(x -> {
-                            cachedLetterMap.computeIfPresent(x, (k, v) -> {
-                                if (v.fontSize != Config.fontSize || !font.getName().equals(v.font.getName())) {
-                                    return new Letter(k, Config.fontSize, font);
-                                }
-                                return v;
-                            });
-                        });
+                        Font font = selectFont(Config.use4x4KanaFont.value());
 
                         String msg = ((TextComponent) e.originalMessage()).content();
-                        if (Config.limitCharTypes) {
+                        if (Config.limitCharTypes.value()) {
                             msg = msg.chars()
                                     .filter(x -> charSet.contains(((char) x)))
                                     .collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append)
                                     .toString();
                         }
 
-                        if (msg.length() > Config.maxLengthOfStr) {
-                            msg = msg.substring(0, Config.maxLengthOfStr);
+                        if (msg.length() > Config.maxLengthOfStr.value()) {
+                            msg = msg.substring(0, Config.maxLengthOfStr.value());
                         }
 
                         List<Letter> letterList = msg.chars()
-                                .mapToObj(x -> cachedLetterMap.computeIfAbsent(((char) x), c -> new Letter(c, Config.fontSize, font)))
+                                .mapToObj(x -> cachedLetterMap.computeIfAbsent(((char) x), c -> new Letter(c, Config.fontSize.value(), font)))
                                 .collect(Collectors.toUnmodifiableList());
 
-                        new MovingString(letterList, Config.speedPerSecond, e.getPlayer().getEyeLocation(), selectBlockData(e.getPlayer()), Config.degrees);
+                        new MovingString(letterList, Config.speedPerSecond.value(), e.getPlayer().getEyeLocation(), selectBlockData(e.getPlayer()), Config.degrees.value());
                     }
                 }.runTask(instance);
             });
@@ -342,8 +333,8 @@ public final class Koekatamarin extends JavaPlugin {
     }};
 
     private BlockData selectBlockData(Player p) {
-        if (!Config.enableUsingTeamColorBlock) {
-            return Config.block;
+        if (!Config.enableUsingTeamColorBlock.value()) {
+            return Config.block.value();
         }
 
         Scoreboard scoreboard = Bukkit.getScoreboardManager().getMainScoreboard();
@@ -353,9 +344,17 @@ public final class Koekatamarin extends JavaPlugin {
                 .findFirst().orElse(null);
 
         if (color == null) {
-            return Config.block;
+            return Config.block.value();
         }
 
-        return colorMaterialMap.getOrDefault(color, Config.block);
+        return colorMaterialMap.getOrDefault(color, Config.block.value());
+    }
+
+    public Font selectFont(boolean use4x4KanaFont) {
+        if (use4x4KanaFont) {
+            return kanaFont;
+        }
+
+        return ipapgothicFont;
     }
 }
