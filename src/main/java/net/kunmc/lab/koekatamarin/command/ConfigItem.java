@@ -74,7 +74,7 @@ public class ConfigItem extends Command {
         );
         static final ArgumentType<Boolean> Boolean = new ArgumentType<>(
                 builder -> builder.booleanArgument("BooleanArgument",
-                        sb -> sb.suggest("true").suggest("true")),
+                        sb -> sb.suggest("true").suggest("false")),
                 x -> true,
                 x -> ((Boolean) x)
         );
