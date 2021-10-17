@@ -159,6 +159,10 @@ public class Letter {
             }
         }
 
+        if (minY == 99999) {
+            return img;
+        }
+
         return img.getSubimage(minX, minY, maxX - minX + 1, maxY - minY + 1);
     }
 }
